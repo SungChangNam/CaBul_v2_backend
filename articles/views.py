@@ -17,13 +17,14 @@ from django.db.models.query_utils import Q
 
 class FeedCommentView(APIView): #댓글 (작성)(성창남)
 
-    def post(self, request,feed_id):
+    def post(self, request, feed_id):
         serializer = FeedCommentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user,feed_id=feed_id)
+            serializer.save(user=request.user, feed_id=feed_id)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 class ArticlesFeedView(APIView):
     
@@ -39,11 +40,11 @@ class ArticlesFeedView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
             
 class FeedCommentDetailView(APIView):  #댓글(수정,삭제)(성창남)
 
     def put(self, request, feed_id, comment_id):
-
         comment = get_object_or_404(Comment, id=comment_id)
         if request.user == comment.user:
             serializer = FeedCommentSerializer(comment, data=request.data)
@@ -62,6 +63,7 @@ class FeedCommentDetailView(APIView):  #댓글(수정,삭제)(성창남)
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response("권한이 없습니다!", status=status.HTTP_403_FORBIDDEN)     
+        
 
 class ArticlesFeedDetailView(APIView):
     
@@ -89,6 +91,7 @@ class ArticlesFeedDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response("권한이 없습니다!", status=status.HTTP_403_FORBIDDEN)
+        
 
 class ArticlesFeedLikeView(APIView): # Feed 좋아요
     permission_classes = [permissions.IsAuthenticated]
@@ -100,6 +103,7 @@ class ArticlesFeedLikeView(APIView): # Feed 좋아요
         else:
             feed.like.add(request.user)
             return Response("좋아요했습니다", status=status.HTTP_200_OK)
+        
 
 class ArticlesSearchView(generics.ListAPIView): 
     queryset = Feed.objects.all()
