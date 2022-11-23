@@ -2,8 +2,10 @@ from pathlib import Path
 from datetime import timedelta
 import os
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = os.path.dirname(BASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -33,6 +35,8 @@ INSTALLED_APPS = [
     'rest_framework',  # rest_framework
     'rest_framework.authtoken',
     'rest_framework_simplejwt', # jwt
+    'rest_framework_simplejwt.token_blacklist',
+
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
@@ -85,6 +89,7 @@ REST_FRAMEWORK = {  # jwt
     'DEFAULT_AUTHENTICATION_CLASSES': (
 
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     )
 }
 

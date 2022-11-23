@@ -8,7 +8,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('users/', include("users.urls")),
     path('articles/', include('articles.urls')),
-    path('api/user/', include('allauth.urls')),
+    path('api/user/', include('allauth.urls')),   # 카카오 소셜로그인에서 사용
 
 ]
 
