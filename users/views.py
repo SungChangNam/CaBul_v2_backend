@@ -30,12 +30,25 @@ from rest_framework import status
 from json.decoder import JSONDecodeError
 import os
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import api_view
 
 BASE_URL = 'http://127.0.0.1:8000/'
 KAKAO_CALLBACK_URI = BASE_URL + 'users/kakao/callback/'
 
 
+class UserView(APIView): # 회원 전체 목록 (내 정보 제외)
+    
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request, user_id): # 회원정보 전체 보기(내 정보 제외)
+            articles = User.objects.exclude(id=user_id)
+            serializer = UserProfileSerializer(articles, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
 class UserDeleteView(APIView): # User 삭제 View
+    
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
      
@@ -48,6 +61,7 @@ class UserDeleteView(APIView): # User 삭제 View
 
 
 class ProfileView(APIView):  # 회원정보 조회, 수정 View
+    
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     
@@ -70,6 +84,7 @@ class ProfileView(APIView):  # 회원정보 조회, 수정 View
 
 
 class PasswordChangeView(APIView):
+    
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     
@@ -115,6 +130,7 @@ class ConfirmEmailView(APIView): # 이메일 인증 View
         return qs
 
 class FollowView(APIView): # follow View
+    
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     
@@ -137,6 +153,7 @@ def kakao_login(request): # 카카오 소셜 로그인 함수
     client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
     return redirect(f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}&redirect_uri={KAKAO_CALLBACK_URI}&response_type=code&scope=account_email")
 
+@api_view(['GET'])
 def kakao_callback(request): # 카카오 소셜 로그인 callback 함수
     client_id = os.environ.get("SOCIAL_AUTH_KAKAO_CLIENT_ID")
     code = request.GET.get("code")
@@ -157,7 +174,6 @@ def kakao_callback(request): # 카카오 소셜 로그인 callback 함수
 
 
     email = kakao_account.get("email", None) # 이메일!
-    print(email)
 
 
     # 이메일 없으면 오류 => 카카오톡 최신 버전에서는 이메일 없이 가입 가능해서 추후 수정해야함
@@ -183,6 +199,7 @@ def kakao_callback(request): # 카카오 소셜 로그인 callback 함수
         accept_json = accept.json()
         accept_json.pop('user', None)
         return JsonResponse(accept_json)
+        # return Response({'message': '로그인 되었습니다!'}, status=status.HTTP_200_OK)
 
     except User.DoesNotExist:
         # 기존에 가입된 유저가 없으면 새로 가입
@@ -195,7 +212,8 @@ def kakao_callback(request): # 카카오 소셜 로그인 callback 함수
         # user의 pk, email, first name, last name과 Access Token, Refresh token 가져옴
         accept_json = accept.json()
         accept_json.pop('user', None)
-        return JsonResponse(accept_json)
+        # return JsonResponse(accept_json)
+        return Response({'message': '가입 되었습니다!'}, status=status.HTTP_200_OK)
 
 class KakaoLogin(SocialLoginView): 
     adapter_class = kakao_view.KakaoOAuth2Adapter

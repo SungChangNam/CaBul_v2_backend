@@ -92,7 +92,6 @@ class ArticlesFeedLikeView(APIView): # Feed 좋아요 View
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     
-    permission_classes = [permissions.IsAuthenticated]
     def post(self, request,feed_id ):
         feed = get_object_or_404(Feed, id=feed_id)
         if request.user in feed.like.all():

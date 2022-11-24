@@ -34,7 +34,7 @@ class UserProfileSerializer(serializers.ModelSerializer): # user 정보 상세�
 class UserUpdateSerializer(serializers.ModelSerializer):  # 회원정보 변경 serializer
     class Meta:
         model = User
-        fields=("nickname","name",)
+        fields=("nickname","name", "profile_image", )
     
     def update(self, instance, validated_data): # 비밀번호 수정 
         for key, value in validated_data.items():
