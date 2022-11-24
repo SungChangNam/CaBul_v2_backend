@@ -4,7 +4,8 @@ from dj_rest_auth.registration.views import VerifyEmailView
 
 urlpatterns = [
     path('delete/', views.UserDeleteView.as_view(), name='user_view'), # 회원 탈퇴
-    path('<int:user_id>/', views.ProfileView.as_view(), name='profilw_view'), # user 정보 상세 조회, 수정
+    path('<int:user_id>/', views.ProfileView.as_view(), name='profile_view'), # user 정보 상세 조회, 수정
+    path('<int:user_id>/passwordchange/', views.PasswordChangeView.as_view(), name='passwordchange_view'), # user 정보 상세 조회, 수정
     path('dj-rest-auth/', include('dj_rest_auth.urls')),  # 로그인 및 기타 dj-rest-auth 기능
     path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')), #회원가입
     path('follow/<int:user_id>/', views.FollowView.as_view(),name='follow_view'), # follow

@@ -18,7 +18,7 @@ from allauth.socialaccount.providers.kakao import views as kakao_view
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from rest_framework.permissions import AllowAny
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
-from users.serializers import UserProfileSerializer, UserUpdateSerializer
+from users.serializers import UserProfileSerializer, UserUpdateSerializer, PasswordChangeSerializer
 from django.conf import settings
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.kakao import views as kakao_view
@@ -29,23 +29,27 @@ import requests
 from rest_framework import status
 from json.decoder import JSONDecodeError
 import os
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 BASE_URL = 'http://127.0.0.1:8000/'
 KAKAO_CALLBACK_URI = BASE_URL + 'users/kakao/callback/'
 
 
 class UserDeleteView(APIView): # User 삭제 View
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
      
     def delete(self, request): # 회원탈퇴
         if request.user.is_authenticated:
             request.user.delete()
-            return Response("탈퇴되었습니다!", status=status.HTTP_204_NO_CONTENT)
+            return Response({"message":"탈퇴되었습니다!"}, status=status.HTTP_204_NO_CONTENT)
         else:
-            return Response("권한이 없습니다!", status=status.HTTP_403_FORBIDDEN)
+            return Response({"message":"권한이 없습니다!"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class ProfileView(APIView):  # 회원정보 조회, 수정 View
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     
     def get(self, request, user_id): # 회원정보 상세 조회
         user = get_object_or_404(User, id=user_id)
@@ -53,16 +57,33 @@ class ProfileView(APIView):  # 회원정보 조회, 수정 View
         return Response(serializer.data)
     
     def put(self, request, user_id): # 회원정보 수정
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         if request.user == user:
             serializer = UserUpdateSerializer(user, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response({"message":"변경되었습니다!"}, status=status.HTTP_200_OK)
         
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response("권한이 없습니다!", status=status.HTTP_403_FORBIDDEN)
+            return Response({"message":"권한이 없습니다!"}, status=status.HTTP_403_FORBIDDEN)
+
+
+class PasswordChangeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def put(self, request, user_id): # 회원정보 수정
+        user = get_object_or_404(User, id=user_id)
+        if request.user == user:
+            serializer = PasswordChangeSerializer(user, data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message":"비밀번호가 변경되었습니다!"}, status=status.HTTP_200_OK)
+        
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message":"권한이 없습니다!"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class ConfirmEmailView(APIView): # 이메일 인증 View
@@ -94,18 +115,22 @@ class ConfirmEmailView(APIView): # 이메일 인증 View
         return qs
 
 class FollowView(APIView): # follow View
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
     def post (self, request, user_id):
         you = get_object_or_404(User, id=user_id)
         me = request.user
         if me == you:
-            return Response("스스로를 follow 할 수 없습니다")
+
+            return Response({"message":"스스로를 follow 할 수 없습니다"})
         else:
             if me in you.followee.all():
                 you.followee.remove(me)
-                return Response("unfollow했습니다.", status=status.HTTP_200_OK)
+                return Response({"message":"unfollow했습니다."}, status=status.HTTP_200_OK)
             else:
                 you.followee.add(me)
-                return Response("follow했습니다.", status=status.HTTP_200_OK)
+                return Response({"message":"follow했습니다."}, status=status.HTTP_200_OK)
 
 
 def kakao_login(request): # 카카오 소셜 로그인 함수
