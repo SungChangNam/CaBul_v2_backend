@@ -37,6 +37,9 @@ class Feed(models.Model): # 피드
     def __str__(self):
         return str(self.title)
 
+
+
+
 class Comment(models.Model):
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, blank=True, related_name="comment_set")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
