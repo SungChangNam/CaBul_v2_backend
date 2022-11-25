@@ -37,7 +37,7 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=20)
     nickname = models.CharField(max_length=16)
     follow = models.ManyToManyField('self', symmetrical=False, related_name='followee', blank=True)
-    profile_image = models.ImageField(blank=True, upload_to="profile_images/", null=True)
+    profile_image = models.ImageField(default="imgs/default.png", blank=True, upload_to="profile_images/", null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 

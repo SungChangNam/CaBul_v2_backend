@@ -8,6 +8,7 @@ class CategorySerializer(serializers.ModelSerializer): # .카테고리 조회 Se
     class Meta:
         model = Feed
         fields=("category", )
+        
 class CommentListSerializer(serializers.ModelSerializer): # 게시글 댓글을 보기위한 Serializer
     user = serializers.SerializerMethodField()
 
