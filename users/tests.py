@@ -15,3 +15,13 @@ class UserRegistrationTest(APITestCase):
             }
         response = self.client.post(url, user_data)  # APITestCase의 기본적인 세팅
         self.assertEqual(response.status_code, 201)
+
+
+class LoginUserTest(APITestCase): # 로그인 테스트 / 이메일 인증 미완
+    def setUp(self):  # DB 셋업
+        self.data = {'email': 'test@naver.com', 'password': 'password123@'}
+        self.user = User.objects.create_user('test@naver.com', 'password123@')
+        
+    def test_login(self):   # 로그인 테스트
+        response = self.client.post(reverse('rest_login'), self.data)
+        self.assertEqual(response.status_code, 200)

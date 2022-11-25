@@ -1,9 +1,10 @@
-from articles.models import Feed
 import torch
 import cv2
 import uuid
-from PIL import Image
 import numpy as np
+
+from PIL import Image
+from articles.models import Feed
 
 def upload_category(img, serializer):    # 게시글 업로드 시 자동 카테고리 분류
     feed = Feed.objects.get(id=serializer['id'])
