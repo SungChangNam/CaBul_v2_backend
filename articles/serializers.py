@@ -35,6 +35,7 @@ class FeedSerializer(serializers.ModelSerializer): #게시글 작성, 수정 시
 class FeedDetailSerializer(serializers.ModelSerializer): #게시글 상세보기 serializer
     user = serializers.SerializerMethodField()
     comments = CommentListSerializer(source = "comment_set", many=True) # 게시글관련 댓글 보기위한 Serializer 설정
+    profile_image = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     
     def get_user(self, obj):
@@ -46,9 +47,12 @@ class FeedDetailSerializer(serializers.ModelSerializer): #게시글 상세보기
     def get_like_count(self, obj):  # 자동으로 연결
         return obj.like.count()
     
+    def get_profile_image(self, obj):
+        return obj.user.profile_image.url
+    
     class Meta:
         model = Feed
-        fields = ("pk", "user", "comments", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id", "like")
+        fields = ("pk", "user", "comments", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id", "profile_image", "like")
 
 
 
@@ -71,4 +75,4 @@ class FeedListSerializer(serializers.ModelSerializer): # 게시글 전체 보기
 
     class Meta:
         model = Feed
-        fields = ("pk", "user", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id", "profile_image")
+        fields = ("pk", "user", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id", "profile_image", "like")
