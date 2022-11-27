@@ -49,6 +49,7 @@ class UserSerializer(serializers.ModelSerializer): # user 정보 전체 조회 s
     
     
 class UserProfileSerializer(serializers.ModelSerializer): # user 정보 상세조회 serializer
+    like_posts = FeedDetailSerializer(many=True)
     followee = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     follow_count = serializers.SerializerMethodField()
     followee_count = serializers.SerializerMethodField()
@@ -67,7 +68,7 @@ class UserProfileSerializer(serializers.ModelSerializer): # user 정보 상세�
     #   프로필 조회
     class Meta:
         model = User
-        fields=("id", "name","nickname","email", "follow_count", "followee_count", "last_login", "follow", "followee", "profile_image", "feed_set_count")
+        fields=("id", "name","nickname","email", "follow_count", "followee_count", "last_login", "follow", "followee", "profile_image", "feed_set_count", "like_posts")
 
 class UserUpdateSerializer(serializers.ModelSerializer):  # 회원정보 변경 serializer
     class Meta:

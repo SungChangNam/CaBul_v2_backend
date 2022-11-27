@@ -48,12 +48,13 @@ class FeedDetailSerializer(serializers.ModelSerializer): #게시글 상세보기
     
     class Meta:
         model = Feed
-        fields = ("pk", "user", "comments", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id")
+        fields = ("pk", "user", "comments", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id", "like")
 
 
 
 class FeedListSerializer(serializers.ModelSerializer): # 게시글 전체 보기 serializer
     user = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
     like_count= serializers.SerializerMethodField()
 
     def get_like_count(self, obj):
@@ -62,9 +63,12 @@ class FeedListSerializer(serializers.ModelSerializer): # 게시글 전체 보기
     def get_user_id(self, obj):
         return obj.user.user_id
     
+    def get_profile_image(self, obj):
+        return obj.user.profile_image.url
+    
     def get_user(self, obj):
         return obj.user.nickname
 
     class Meta:
         model = Feed
-        fields = ("pk", "user", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id")
+        fields = ("pk", "user", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id", "profile_image")
