@@ -77,6 +77,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 # ACCOUNT_EMAIL_VERIFICATION = "none"
 
+URL_FRONT = 'http://127.0.0.1:5500/'
+
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/' # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
@@ -221,6 +223,7 @@ MEDIA_URL = "/media/"
 
 
 ACCOUNT_ADAPTER = 'users.adapters.CustomAccountAdapter'
+# URL_FRONT = 'http://127.0.0.1:5500/'
 
 CORS_ALLOW_ALL_ORIGINS = True
 

@@ -10,7 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from articles.models import Feed, Comment, TaggedFeed
 from articles.pagination import PaginationHandlerMixin
-from articles.serializers import FeedSerializer, FeedListSerializer, CommentListSerializer, TagSerializer, FeedDetailSerializer, CategorySerializer
+from articles.serializers import FeedSerializer, FeedListSerializer, CommentListSerializer, FeedDetailSerializer, CategorySerializer
 from articles.deep_learning import upload_category, transform
 
 
@@ -44,18 +44,32 @@ class CategoryView(APIView): # 카테고리 목록 조회 View
                 "category": result,
                 "count": count
             })
-                
+            
+    
+        
         return Response(category_list, status=status.HTTP_200_OK)
     
-class ArticlesCategoryFeedView(APIView): # 게시글 카테고리 분류 View
+class ArticlesCategoryFeedView(APIView, PaginationHandlerMixin): # 게시글 카테고리 분류 View
 
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+    pagination_class = ItemPagination
 
     def get(self, request, feed_category): # 게시글 카테고리 분류
         articles = Feed.objects.filter(category=feed_category)
-        serializer = FeedListSerializer(articles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        page = self.paginate_queryset(articles)
+        
+        if page is not None:
+            serializer = self.get_paginated_response(FeedListSerializer(page, many=True, context={"request": request}).data)
+        else:
+            serializer = FeedListSerializer(articles, many=True, context={"request": request})
+            
+        data = {
+            'articles': serializer.data
+        }
+        
+        return Response(data, status=status.HTTP_200_OK)
 
 class ArticlesFeedView(APIView, PaginationHandlerMixin):  # 게시글 전체보기, 등록 View
     
@@ -64,8 +78,7 @@ class ArticlesFeedView(APIView, PaginationHandlerMixin):  # 게시글 전체보�
     pagination_class = ItemPagination
 
     def get(self, request): # 게시글 전체 보기
-        articles = Feed.objects.all()
-        
+        articles = Feed.objects.all().order_by('-created_at')
         
         page = self.paginate_queryset(articles)
         
@@ -173,13 +186,6 @@ class ArticlesSearchView(generics.ListAPIView): # 게시글 검색 View
     # 검색 키워드를 지정했을 때, 매칭을 시도할 필드
     search_fields = ["title"]
 
-class TagView(generics.ListAPIView): # 게시글 Tag View
-    
-    permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-    
-    queryset = TaggedFeed.objects.all()
-    serializer_class = TagSerializer
         
 class FeedCommentView(APIView): # 댓글 등록 View
     

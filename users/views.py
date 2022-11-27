@@ -14,6 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
+from rest_framework.pagination import PageNumberPagination
 
 from dj_rest_auth.registration.views import SocialLoginView
 
@@ -26,12 +27,19 @@ from json import JSONDecodeError
 from json.decoder import JSONDecodeError
 
 from users.models import User
-from users.serializers import UserProfileSerializer, UserUpdateSerializer, PasswordChangeSerializer
+from users.serializers import UserProfileSerializer, UserUpdateSerializer, PasswordChangeSerializer, UserSerializer
+from users.pagination import PaginationHandlerMixin
 
+from articles.models import Feed
+from articles.serializers import FeedListSerializer
 
 BASE_URL = 'http://127.0.0.1:8000/'
 KAKAO_CALLBACK_URI = BASE_URL + 'users/kakao/callback/'
 
+
+
+class ItemPagination(PageNumberPagination): # pagination 상속
+    page_size = 12
 
 class UserView(APIView): # 회원 전체 목록 (내 정보 제외) View
     
@@ -40,7 +48,7 @@ class UserView(APIView): # 회원 전체 목록 (내 정보 제외) View
 
     def get(self, request, user_id): # 회원정보 전체 보기(내 정보 제외)
             articles = User.objects.exclude(id=user_id)
-            serializer = UserProfileSerializer(articles, many=True)
+            serializer = UserSerializer(articles, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
 
@@ -57,15 +65,33 @@ class UserDeleteView(APIView): # User 삭제 View
             return Response({"message":"권한이 없습니다!"}, status=status.HTTP_403_FORBIDDEN)
 
 
-class ProfileView(APIView):  # 회원정보 조회, 수정 View
+class ProfileView(APIView, PaginationHandlerMixin):  # 회원정보 조회, 수정 View
     
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+    pagination_class = ItemPagination
     
     def get(self, request, user_id): # 회원정보 상세 조회
-        user = get_object_or_404(User, id=user_id)
-        serializer = UserProfileSerializer(user)  
-        return Response(serializer.data)
+        
+        articles = Feed.objects.filter(user_id=user_id).order_by('-created_at')
+        users = get_object_or_404(User, id=user_id)
+        
+        page = self.paginate_queryset(articles)
+        
+        if page is not None:
+            serializer = self.get_paginated_response(FeedListSerializer(page, many=True, context={"request": request}).data)
+        else:
+            serializer = FeedListSerializer(articles, many=True, context={"request": request})
+            
+        serializer2 = UserProfileSerializer(users)  
+        data = {
+            'articles': serializer.data,
+            'users': serializer2.data
+        }
+        
+        return Response(data, status=status.HTTP_200_OK)
+        
+
     
     def put(self, request, user_id): # 회원정보 수정
         user = get_object_or_404(User, id=user_id)

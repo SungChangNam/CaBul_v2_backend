@@ -4,6 +4,7 @@ from taggit.serializers import (TagListSerializerField,
                                 TaggitSerializer)        #태그
 
 
+
 class CategorySerializer(serializers.ModelSerializer): # .카테고리 조회 Serializer
     class Meta:
         model = Feed
@@ -39,12 +40,15 @@ class FeedDetailSerializer(serializers.ModelSerializer): #게시글 상세보기
     def get_user(self, obj):
         return obj.user.nickname
     
+    def get_user_id(self, obj):
+        return obj.user.user_id
+    
     def get_like_count(self, obj):  # 자동으로 연결
         return obj.like.count()
     
     class Meta:
         model = Feed
-        fields = ("pk", "user", "comments", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category",)
+        fields = ("pk", "user", "comments", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id")
 
 
 
@@ -55,16 +59,12 @@ class FeedListSerializer(serializers.ModelSerializer): # 게시글 전체 보기
     def get_like_count(self, obj):
         return obj.like.count()
     
+    def get_user_id(self, obj):
+        return obj.user.user_id
+    
     def get_user(self, obj):
         return obj.user.nickname
 
     class Meta:
         model = Feed
-        fields = ("pk", "user", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category",)
-
-class TagSerializer(TaggitSerializer, serializers.ModelSerializer): #태그
-    tags = TagListSerializerField()
-
-    class Meta:
-        model = TaggedFeed
-        fields = '__all__'
+        fields = ("pk", "user", "like_count", "content", "title", "transfer_image", "created_at", "updated_at", "category", "user_id")
